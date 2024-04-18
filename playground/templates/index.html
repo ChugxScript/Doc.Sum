@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'index.css' %}">
+    <title>DOC.SUM</title>
+</head>
+<body>
+    <div class="DocSumCavas">
+        <!-- header -->
+        <h1>DOCSUM</h1>
+
+        <!-- file upload -->
+        <div id="file-upload-section">
+            <form class="dropzone" id="myDropzone" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Upload</button>
+            </form>
+        </div>
+
+        <!-- if user upload file, hide the file upload -->
+        <div id="display-content"">
+            <h1>File Content</h1>
+            <pre id="extracted-text">{{ extracted_text }}</pre>
+        </div>
+    </div>
+
+
+    <script src="{% static 'index.js' %}"></script>
+
+</body>
+</html>
