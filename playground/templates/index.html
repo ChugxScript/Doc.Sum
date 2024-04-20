@@ -5,29 +5,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{% static 'index.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Didact+Gothic&display=swap" rel="stylesheet">
     <title>DOC.SUM</title>
 </head>
 <body>
-    <div class="DocSumCavas">
-        <!-- header -->
-        <h1>DOCSUM</h1>
-
-        <!-- file upload -->
-        <div id="file-upload-section">
-            <form class="dropzone" id="myDropzone" method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit">Upload</button>
-            </form>
+    <header class="header">
+        <div class="header-title">
+            <img id="docsum_logo"><span><h1>Doc.Sum</h1></span>
         </div>
+        <div class="header-options">
+            <span>ABOUT</span>
+            <span>CONTACT</span>
+            <span>DONATE</span>
+        </div>
+    </header>
 
-        <!-- if user upload file, hide the file upload -->
-        <div id="display-content"">
-            <h1>File Content</h1>
-            <pre id="extracted-text">{{ extracted_text }}</pre>
+
+    <div class="Docsum-canvas">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="input-output-contatiner">
+                <div class="input-container">
+                    <div class="input-text-container">
+                        <textarea name="input_text" class="input-text" oninput="autoResize(this)" placeholder="ENTER YOUR TEXT HERE AND PRESS 'SUMMARIZE'"></textarea>
+                    </div>
+                    <div class="input-controls" >
+                        <div class="upload-file" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
+                            <p>----- OR -----</p>
+                            <p>DROP YOUR FILES HERE</p>
+                            <p>NO FILE CHOSEN</p>
+                            <div class="file-container">
+                                <input type="file" name="uploaded_file" onchange="fileChangeHandler(event)">
+                                <span class="remove_file_btn"><b>X</b></span>
+                            </div>
+                        </div>
+                        <div class="settings">
+                            <span>
+                                <label for="summary_len"><b>SUMMARY LENGTH:</b></label>
+                                <select name="summary_len" id="summary_len">
+                                    <option value="0.1">10%</option>
+                                    <option value="0.2">20%</option>
+                                    <option value="0.3">30%</option>
+                                    <option value="0.4">40%</option>
+                                    <option value="0.5">50%</option>
+                                    <option value="0.6">60%</option>
+                                    <option value="0.7">70%</option>
+                                    <option value="0.8">80%</option>
+                                    <option value="0.9">90%</option>
+                                </select>
+                            </span>
+                        </div>
+                        <div class="submit-btn">
+                            <button type="submit">SUMMARIZE</button>
+                        </div>
+                    </div>
+                </div>                
+    
+                
+            </div>
+        </form>
+    
+        <br>
+    
+        <div class="additional-content-container">
+            <div class="uploaded-text">
+                <h1>ORIGINAL TEXT</h1>
+                <div class="summary-result">
+                    <p>{{ uploaded_text }}</p>
+                </div>
+                <div class="summary-details">
+                    <span>ORIGINAL TEXT LENGTH: <b>{{ uploaded_text_len }}</b></span>
+                </div>
+            </div>
+
+            <div class="output-containter">
+                <h1>SUMMARY</h1>
+                <div class="summary-result">
+                    <p>{{ summarized_text }}</p>
+                </div>
+                <div class="summary-details">
+                    <span>SUMMARIZE TEXT LENGTH: <b>{{ summarized_text_len }}</b></span>
+                </div>
+            </div>
         </div>
     </div>
 
+    
 
     <script src="{% static 'index.js' %}"></script>
 

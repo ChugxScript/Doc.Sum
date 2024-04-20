@@ -1,47 +1,66 @@
-// function handleFileUpload(event) {
-//     const file = event.target.files[0];
-//     const reader = new FileReader();
-//     reader.onload = function(e) {
-//         const fileContent = e.target.result;
-//         document.getElementById('display-content').style.display = 'block';
-//         document.getElementById('fileContent').textContent = fileContent;
-//     };
-//     reader.readAsText(file);
-// }
 
-// var extractedText = document.getElementById("extracted-text").textContent.trim();
-// if (extractedText !== "") {
-//     document.getElementById("file-upload-section").style.display = "none";
-//     document.getElementById("display-content").style.display = "block";
-// }
+function autoResize(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = (textarea.scrollHeight) + 'px';
+}
 
-// function dropHandler(ev) {
-//     console.log("File(s) dropped");
-  
-//     // Prevent default behavior (Prevent file from being opened)
-//     ev.preventDefault();
-  
-//     if (ev.dataTransfer.items) {
-//       // Use DataTransferItemList interface to access the file(s)
-//       [...ev.dataTransfer.items].forEach((item, i) => {
-//         // If dropped items aren't files, reject them
-//         if (item.kind === "file") {
-//           const file = item.getAsFile();
-//           console.log(`… file[${i}].name = ${file.name}`);
-//         }
-//       });
-//     } else {
-//       // Use DataTransfer interface to access the file(s)
-//       [...ev.dataTransfer.files].forEach((file, i) => {
-//         console.log(`… file[${i}].name = ${file.name}`);
-//       });
-//     }
-// }
-  
-// function dragOverHandler(ev) {
-//     console.log("File(s) in drop zone");
+function fileChangeHandler(event) {
+    const fileInput = event.target;
+    const fileList = fileInput.files;
 
-//     // Prevent default behavior (Prevent file from being opened)
-//     ev.preventDefault();
-// }
-  
+    if (fileList.length > 1) {
+        alert("Please select only one file.");
+        fileInput.value = '';
+        return;
+    }
+
+    if (fileList.length === 1) {
+        const fileName = fileList[0].name;
+        const uploadFileDiv = fileInput.closest('.upload-file');
+        const dropText = uploadFileDiv.querySelector('p:last-of-type');
+        dropText.textContent = fileName;
+
+        // Clear textarea
+        const textarea = uploadFileDiv.closest('.input-container').querySelector('textarea');
+        textarea.value = '';
+    }
+}
+
+function dropHandler(event) {
+    event.preventDefault();
+
+    const fileInput = event.currentTarget.querySelector('input[type="file"]');
+    const fileList = event.dataTransfer.files;
+
+    if (fileList.length > 1) {
+        alert("Please drop only one file.");
+        return;
+    }
+
+    if (fileList.length === 1) {
+        fileInput.files = fileList;
+        fileChangeHandler({ target: fileInput });
+    }
+}
+
+function dragOverHandler(event) {
+    event.preventDefault();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const removeBtns = document.querySelectorAll('.remove_file_btn');
+    
+    removeBtns.forEach(function(removeBtn) {
+        removeBtn.addEventListener('click', function() {
+            const fileInput = this.parentElement.querySelector('input[type="file"]');
+            fileInput.value = ''; // Clear the file input
+            const uploadFileDiv = fileInput.closest('.upload-file');
+            const dropText = uploadFileDiv.querySelector('p:last-of-type');
+            dropText.textContent = "NO FILE CHOSEN";
+        });
+    });
+
+    const docsum_logo = document.getElementById('docsum_logo');
+    docsum_logo.setAttribute('src', 'https://media1.tenor.com/m/Z_KEDm9F_hQAAAAC/document-office.gif');
+});
+
