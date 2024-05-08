@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .utils import extract_text_from_pdf, extract_text_from_docx
+from .utils import *
 from .nlp import summarize
 
 
@@ -13,16 +13,16 @@ def DocSum(request):
         uploaded_file = request.FILES['uploaded_file']
         if uploaded_file.name.endswith('.pdf'):
             uploaded_text = extract_text_from_pdf(uploaded_file)
-            summarized_text = summarize(uploaded_text, float(summary_len))
+            summarized_text = summarize(uploaded_text, int(summary_len))
         elif uploaded_file.name.endswith('.docx'):
             uploaded_text = extract_text_from_docx(uploaded_file)
-            summarized_text = summarize(uploaded_text, float(summary_len))
+            summarized_text = summarize(uploaded_text, int(summary_len))
         else:
             summarized_text = "Unsupported file format"
 
     elif input_text is not None:
-        uploaded_text = input_text
-        summarized_text = summarize(uploaded_text, float(summary_len))
+        uploaded_text = format_input_text(input_text)
+        summarized_text = summarize(uploaded_text, int(summary_len))
 
     return render(
         request, 'index.html',

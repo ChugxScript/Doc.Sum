@@ -1,42 +1,44 @@
 # playground/utils.py
 from docx import Document
-import os
-
-def extract_text_from_document(file):
-    _, file_extension = os.path.splitext(file.name)
-    if file_extension.lower() == '.docx':
-        document = Document(file)
-        text = '\n'.join([paragraph.text for paragraph in document.paragraphs])
-    elif file_extension.lower() == '.txt':
-        text = file.read().decode('utf-8')
-    else:
-        text = 'Unsupported file format'
-    return text
+from PyPDF2 import PdfReader
+from nltk.tokenize import sent_tokenize
 
 def extract_text_from_pdf(uploaded_file):
-    # Import PdfReader from PyPDF2
-    from PyPDF2 import PdfReader
-    
-    # Initialize an empty string to store the extracted text
     text = ""
-
-    # Open the PDF file in binary mode and create a PdfReader object
     with uploaded_file.open('rb') as f:
         pdf_reader = PdfReader(f)
-
-        # Iterate through each page and extract text
         for page in pdf_reader.pages:
-            text += page.extract_text()
-
+            extracted_text = page.extract_text()
+            sentences = sent_tokenize(extracted_text)
+            for sentence in sentences:
+                if len(sentence.split(' ')) > 10:
+                    text += sentence + "\n"
     return text
 
 
 def extract_text_from_docx(uploaded_file):
-    # Implement DOCX text extraction logic here
-    # Example using python-docx library
-    import docx
     text = ""
-    doc = docx.Document(uploaded_file)
-    for paragraph in doc.paragraphs:
-        text += paragraph.text + '\n'
+    doc = Document(uploaded_file)
+    for i, paragraph in enumerate(doc.paragraphs):
+        if len(paragraph.text.split(' ')) > 10:
+            text += paragraph.text + "\n"
+    return text
+
+def extract_text_from_txt(uploaded_file):
+    text = uploaded_file.read().decode('utf-8')
+    original_sentences = [sentence for sentence in sent_tokenize(text) if len(sentence.split(' ')) > 10]
+    
+    # update text
+    text = ''
+    for sentence in original_sentences:
+        text += sentence + '\n'
+    return text
+
+def format_input_text(input_text):
+    original_sentences = [sentence for sentence in sent_tokenize(input_text) if len(sentence.split(' ')) > 10]
+    
+    # update text
+    text = ''
+    for sentence in original_sentences:
+        text += sentence + '\n'
     return text
