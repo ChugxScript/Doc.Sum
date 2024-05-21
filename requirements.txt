@@ -1,3 +1,6 @@
 django
 python-docx
 nltk
+transformers
+torch
+langdetect

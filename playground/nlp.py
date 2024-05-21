@@ -6,9 +6,14 @@ from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.tokenize import RegexpTokenizer
 from nltk.probability import FreqDist
 from heapq import nlargest
+from transformers import BartForConditionalGeneration, BartTokenizer
+from concurrent.futures import ThreadPoolExecutor
 
 # nltk.download('stopwords')
 # nltk.download('punkt')
+model_name = 'facebook/bart-large-cnn'
+model = BartForConditionalGeneration.from_pretrained(model_name)
+tokenizer = BartTokenizer.from_pretrained(model_name)
 
 def summarize(uploaded_text, summary_len):
     tokenized_text = token(uploaded_text)
@@ -19,7 +24,18 @@ def summarize(uploaded_text, summary_len):
     rank_sentence = sentence_scores(tokenized_sentence, text_freq)
     nltk_summary = get_summary(rank_sentence, orig_sent, summary_len)
 
-    return nltk_summary
+    BART_sum_perc = summary_len
+    BART_chunk_sz = 1024
+    bart_summary = BART_summary(uploaded_text, model, tokenizer, BART_chunk_sz, BART_sum_perc)
+    
+    index = check_index(bart_summary)
+    reference_summary = get_sample_from_dataset(dataset, index)
+    scores = evaluate_summary(reference_summary, nltk_summary)
+    print(f"nltk_summary score: {scores}")
+
+    scores = evaluate_summary(reference_summary, bart_summary)
+    print(f"bart_summary score: {scores}")
+    return nltk_summary, bart_summary
 
 def token(text):
     tokenizer = RegexpTokenizer(r'\w+')
@@ -67,6 +83,27 @@ def get_summary(sent_scores, original_sentences, summary_len):
     final_summary = ' '.join(summary)
     return final_summary
 
+def chunk_text(text, tokenizer, chunk_size):
+    inputs = tokenizer.encode(text, return_tensors='pt', max_length=chunk_size, truncation=True, padding=True)
+    input_ids = inputs[0]
+    chunks = [input_ids[i:i + chunk_size] for i in range(0, len(input_ids), chunk_size)]
+    return chunks
+
+def summarize_chunk(chunk, model, tokenizer, max_length):
+    summary_ids = model.generate(chunk.unsqueeze(0), max_length=max_length, min_length=max_length // 2, num_beams=4, length_penalty=2.0, early_stopping=True)
+    summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+    return summary
+
+def BART_summary(document, model, tokenizer, chunk_size, summary_percentage):
+    chunks = chunk_text(document, tokenizer, chunk_size)
+    total_tokens = sum([len(chunk) for chunk in chunks])
+    max_length = int(chunk_size * (summary_percentage / 100))
+    
+    with ThreadPoolExecutor() as executor:
+        summaries = list(executor.map(lambda chunk: summarize_chunk(chunk, model, tokenizer, max_length), chunks))
+    
+    return " ".join(summaries)
+
 stop_words_filipino = {
     'at', 'ang', 'Ang', 'sa', 'ng', 'mga', 'ngunit', 'o', 'pero', 'kaya', 'din',
     'rin', 'ito', 'yan', 'ni', 'si', 'sina', 'nila', 'kay', 'mula', 'hanggang',
@@ -94,7 +131,32 @@ stop_words_filipino = {
     'amin', 'na', 'ay', 'may', 'ating', 'pag', 'di',
 }
 
+import datasets
+dataset = datasets.load_dataset('olors/test_summary')
 
+def get_sample_from_dataset(dataset, index):
+    sample = dataset['train'][index]
+    reference_summary = sample['summary']
+    return reference_summary
+
+from langdetect import detect
+
+def check_index(text):
+    try:
+        language = detect(text)
+        if language == 'en':
+            return 0
+        else:
+            return 1
+    except:
+        return 0
+
+from rouge_score import rouge_scorer
+
+def evaluate_summary(reference_summary, generated_summary):
+    scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
+    scores = scorer.score(reference_summary, generated_summary)
+    return scores
 
 
 

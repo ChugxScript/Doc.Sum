@@ -1,1 +1,7 @@
 node_modules
+Others/train_data.json
+Others/train_data.csv
+Others/test_data.json
+Others/test_data.csv
+Others/val_data.json
+Others/val_data.csv

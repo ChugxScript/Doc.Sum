@@ -187,7 +187,7 @@ body {
 .additional-content-container{
     padding: 10px;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     background-color: white;
     border-radius: 15px;
     border: 1px solid black;
@@ -198,7 +198,8 @@ body {
     padding: 5px;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid black;
+    margin-bottom: 10px;
+    /* border-right: 1px solid black; */
 }
 
 .output-containter{
@@ -206,7 +207,7 @@ body {
     padding: 5px;
     display: flex;
     flex-direction: column;
-    border-left: 1px solid black;
+    border-top: 1px solid black;
 }
 
 

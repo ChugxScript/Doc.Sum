@@ -75,12 +75,22 @@
             </div>
 
             <div class="output-containter">
-                <h1>SUMMARY</h1>
+                <h1>nltk SUMMARY</h1>
                 <div class="summary-result">
                     <p>{{ summarized_text }}</p>
                 </div>
                 <div class="summary-details">
                     <span>SUMMARIZE TEXT LENGTH: <b>{{ summarized_text_len }}</b></span>
+                </div>
+            </div>
+
+            <div class="output-containter">
+                <h1>BART SUMMARY</h1>
+                <div class="summary-result">
+                    <p>{{ bart_summary }}</p>
+                </div>
+                <div class="summary-details">
+                    <span>SUMMARIZE TEXT LENGTH: <b>{{ bart_summary_len }}</b></span>
                 </div>
             </div>
         </div>
